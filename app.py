@@ -41,7 +41,6 @@ st.markdown("""
     }
     .evidence-chain {
         background-color: #fff3cd;
-        color: #000000;
         padding: 1rem;
         border-radius: 0.5rem;
         border-left: 4px solid #ffc107;
