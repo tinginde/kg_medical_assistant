@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
-from langchain.prompts import PromptTemplate
-from langchain.schema import HumanMessage
+from langchain_core.prompts import PromptTemplate
+from langchain_core.messages import HumanMessage
 
 import kg_model
 import rag_engine
@@ -22,6 +22,7 @@ def get_llm_response(prompt):
         try:
             from langchain_openai import ChatOpenAI
             llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.7, api_key=openai_key)
+            print("[INFO] Using OpenAI API (gpt-3.5-turbo)")
             response = llm.invoke([HumanMessage(content=prompt)])
             return response.content
         except Exception as e:
@@ -31,7 +32,8 @@ def get_llm_response(prompt):
     if google_key:
         try:
             from langchain_google_genai import ChatGoogleGenerativeAI
-            llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.7, google_api_key=google_key)
+            llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7, google_api_key=google_key)
+            print("[INFO] Using Google Gemini API (gemini-2.0-flash)")
             response = llm.invoke([HumanMessage(content=prompt)])
             return response.content
         except Exception as e:
@@ -90,7 +92,7 @@ def process_patient_query(G, patient_id, query):
         print(f"[RAG Info]: {line}")
     
     # 2. Generate Prompt using LangChain PromptTemplate
-    template = """You are a clinical decision support AI specialized in obesity management for the UNIFIED project.
+    template = """You are a clinical decision support AI specialized in obesity management.
 
 Knowledge Graph Context:
 {context}
@@ -140,7 +142,7 @@ Response:"""
 
 def main():
     print("="*80)
-    print("KG-RAG POC for Obesity Management - UNIFIED Project")
+    print("KG-RAG POC for Obesity Management")
     print("="*80)
     
     # 1. Build Graph

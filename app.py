@@ -41,6 +41,7 @@ st.markdown("""
     }
     .evidence-chain {
         background-color: #fff3cd;
+        color: #000000;
         padding: 1rem;
         border-radius: 0.5rem;
         border-left: 4px solid #ffc107;
@@ -62,7 +63,7 @@ if 'chat_history' not in st.session_state:
 # Sidebar
 with st.sidebar:
     st.markdown("### 🏥 KG-RAG POC")
-    st.markdown("**UNIFIED Project**")
+    st.markdown("**Knowledge Graph-based RAG System**")
     st.markdown("Obesity Management Use Case")
     st.markdown("---")
     
@@ -135,16 +136,30 @@ if page == "📊 Dashboard":
         
         # Outcome breakdown
         st.markdown('<div class="sub-header">Outcome Distribution</div>', unsafe_allow_html=True)
+        st.caption("病患體重變化結果分類統計")
+        
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown(f'<div class="stat-box">✅ Successful<br><span style="font-size:2rem;">{stats["successful_count"]}</span></div>', unsafe_allow_html=True)
+            st.metric(
+                label="✅ Successful (成功)",
+                value=stats["successful_count"],
+                help="體重成功減輕的病患數量"
+            )
         
         with col2:
-            st.markdown(f'<div class="stat-box">🐌 Slow<br><span style="font-size:2rem;">{stats["slow_count"]}</span></div>', unsafe_allow_html=True)
+            st.metric(
+                label="🐌 Slow (緩慢)",
+                value=stats["slow_count"],
+                help="體重減輕緩慢的病患數量"
+            )
         
         with col3:
-            st.markdown(f'<div class="stat-box">📈 Increase<br><span style="font-size:2rem;">{stats["increase_count"]}</span></div>', unsafe_allow_html=True)
+            st.metric(
+                label="📈 Increase (增加)",
+                value=stats["increase_count"],
+                help="體重增加的病患數量"
+            )
         
         # Patient Table
         st.markdown('<div class="sub-header">Patient Details</div>', unsafe_allow_html=True)
@@ -316,23 +331,38 @@ elif page == "💬 LLM Chat":
 elif page == "📈 Batch Analysis":
     st.markdown('<div class="main-header">📈 Batch Analysis</div>', unsafe_allow_html=True)
     
+    st.info("""
+    **批次分析功能說明**：
+    - 🤖 對所有病患執行完整的 **KG-RAG + LLM 分析**
+    - 📊 自動提取知識圖譜證據鏈
+    - 💬 使用 Gemini AI 生成個別化臨床解釋
+    - 📥 可下載包含 AI 見解的完整報告
+    
+    ⚠️ 注意：此功能會調用 LLM API，處理 10 位病患約需 30-60 秒
+    """)
+    
     try:
         # Load data if not already loaded
         if st.session_state.patients is None:
             patients, stats, df = load_patient_data(st.session_state.csv_path)
             st.session_state.patients = patients
         
-        if st.button("🔄 Process All Patients", type="primary"):
+        # Show patient count
+        st.metric("待分析病患數", len(st.session_state.patients))
+        
+        if st.button("🔄 開始批次分析", type="primary", use_container_width=True):
             # Build graph
-            with st.spinner("Building knowledge graph..."):
+            with st.spinner("建構知識圖譜..."):
                 G, patients_data = build_graph_from_csv(st.session_state.csv_path if isinstance(st.session_state.csv_path, str) else "mok.csv")
                 st.session_state.graph = G
             
             results = []
             progress_bar = st.progress(0)
+            status_text = st.empty()
             
             for i, patient in enumerate(st.session_state.patients):
                 patient_id = patient['id']
+                status_text.text(f"正在分析 {patient_id}... ({i+1}/{len(st.session_state.patients)})")
                 
                 # Retrieve context
                 reasoning_text, evidence = retrieve_context(G, patient_id)
@@ -340,7 +370,7 @@ elif page == "📈 Batch Analysis":
                 # Generate query
                 query = f"What explains {patient_id}'s {patient['weight_change_category']} weight change?"
                 
-                # Get LLM response (simplified for batch)
+                # Get LLM response
                 prompt = format_prompt(query, reasoning_text)
                 llm_response = get_llm_response(prompt)
                 
@@ -349,30 +379,46 @@ elif page == "📈 Batch Analysis":
                     'Weight Change': f"{patient['weight_change_value']} kg",
                     'Category': patient['weight_change_category'],
                     'Evidence Chains': len(evidence),
-                    'Summary': llm_response[:200] + "..."
+                    'AI Analysis': llm_response[:300] + "..." if len(llm_response) > 300 else llm_response
                 })
                 
                 progress_bar.progress((i + 1) / len(st.session_state.patients))
             
+            status_text.empty()
+            
             # Display results table
-            st.markdown('<div class="sub-header">Analysis Results</div>', unsafe_allow_html=True)
+            st.markdown('<div class="sub-header">分析結果</div>', unsafe_allow_html=True)
             results_df = pd.DataFrame(results)
             st.dataframe(results_df, use_container_width=True, height=400)
             
             # Download button
             csv = results_df.to_csv(index=False)
             st.download_button(
-                label="📥 Download Results (CSV)",
+                label="📥 下載完整分析報告 (CSV)",
                 data=csv,
-                file_name="batch_analysis_results.csv",
-                mime="text/csv"
+                file_name=f"kg_rag_batch_analysis_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv",
+                use_container_width=True
             )
             
-            st.success(f"✅ Processed {len(results)} patients successfully!")
+            st.success(f"✅ 成功分析 {len(results)} 位病患！")
+            
+            # Show summary statistics
+            st.markdown('<div class="sub-header">分析摘要</div>', unsafe_allow_html=True)
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                avg_chains = sum(r['Evidence Chains'] for r in results) / len(results)
+                st.metric("平均證據鏈數", f"{avg_chains:.1f}")
+            with col2:
+                successful = sum(1 for r in results if r['Category'] == 'Successful')
+                st.metric("成功案例", f"{successful}/{len(results)}")
+            with col3:
+                avg_analysis_length = sum(len(r['AI Analysis']) for r in results) / len(results)
+                st.metric("平均分析長度", f"{avg_analysis_length:.0f} 字元")
     
     except Exception as e:
         st.error(f"Error: {e}")
 
 # Footer
 st.markdown("---")
-st.markdown("**KG-RAG POC** | UNIFIED Project | Powered by Streamlit")
+st.markdown("**KG-RAG POC** | Powered by Streamlit & Gemini AI")

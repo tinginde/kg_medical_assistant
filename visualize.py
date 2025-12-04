@@ -71,7 +71,7 @@ def visualize_graph(G, highlighted_paths=None, output_file="knowledge_graph.png"
     ]
     plt.legend(handles=legend_elements, loc='upper left', fontsize=10)
     
-    plt.title("Knowledge Graph: Obesity Management (UNIFIED Project)", fontsize=16, fontweight='bold')
+    plt.title("Knowledge Graph: Obesity Management KG-RAG System", fontsize=16, fontweight='bold')
     plt.axis('off')
     plt.tight_layout()
     plt.savefig(output_file, dpi=300, bbox_inches='tight')

@@ -1,6 +1,6 @@
 # KG-RAG POC for Obesity Management
 
-A Knowledge Graph-based Retrieval-Augmented Generation (KG-RAG) system for the UNIFIED project, demonstrating integration of Digital Health Technologies (DHT), Clinical Outcome Assessments (COA), and Patient Preference Information (PPI).
+A Knowledge Graph-based Retrieval-Augmented Generation (KG-RAG) system demonstrating integration of Digital Health Technologies (DHT), Clinical Outcome Assessments (COA), and Patient Preference Information (PPI) for obesity management.
 
 ## Features
 - **Knowledge Graph modeling** using NetworkX
