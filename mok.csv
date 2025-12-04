@@ -1,0 +1,11 @@
+ID,Weight Change (COA),HbA1c (COA),Daily Steps (DHT),Caloric Intake (DHT),Dietary Flexibility (PPI Preference),Rate of Weight Loss (PPI Preference),Key Scenario (For KG Edges)
+P001,-0.5 kg (Slow),7.0%,"1,500","2,800",High (9/10),Low (3/10),"Preference Conflict: High flexibility leads to high intake, resulting in slow progress."
+P002,-4.0 kg (Successful),5.5%,"10,000","1,500",Low (2/10),High (8/10),Behavioral Alignment: Strict restriction and high effort (steps) lead to successful outcome.
+P003,+1.0 kg (Increase),7.8%,500,"3,200",Very High (10/10),Low (1/10),High Risk: Extremely low activity combined with extremely high intake.
+P004,-2.0 kg (Moderate),6.5%,"8,000","1,900",Medium (5/10),Medium (5/10),"Stable Balance: Moderate effort, moderate results."
+P005,-1.0 kg (Slow),6.0%,"15,000","2,500",Low (3/10),High (9/10),Exercise Cannot Compensate: High activity (DHT) is offset by high caloric intake.
+P006,-3.5 kg (Successful),5.9%,"9,000","1,600",Medium (6/10),High (7/10),Healthy Stability: Good weight and blood sugar control.
+P007,+0.5 kg (Increase),7.2%,"1,000","2,200",High (8/10),Low (2/10),"Low Activity Impact: Moderate intake, but very low activity leads to weight gain."
+P008,-3.0 kg (Moderate-High),6.3%,"7,500","1,700",Low (4/10),High (8/10),High Efficiency: Lower flexibility resulted in good weight loss.
+P009,-1.5 kg (Slow),7.5%,"2,000","1,800",Medium (5/10),Medium (5/10),"Inefficient/Potential Misreporting: Low activity but low reported intake, leading to slow results (warrants further analysis)."
+P010,-2.5 kg (Moderate),6.1%,"11,000","2,100",Medium-High (7/10),Medium-High (7/10),Flexible but Effective: High activity level allows for some dietary flexibility.
