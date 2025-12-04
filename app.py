@@ -233,9 +233,9 @@ elif page == "🔍 KG Visualization":
                     st.markdown(f"""
                     <div class="evidence-chain">
                     <strong>Chain {i}:</strong><br>
-                    {item['preference']} <span style="color:#d62728;">--[{item['conflict_relation']}]--></span> 
-                    {item['behavior']} <span style="color:#2ca02c;">--[{item['behavior_relation']}]--></span> 
-                    {item['outcome']}
+                    <strong>{item['preference']}</strong> <span style="color:#1565C0; font-weight:600;">--[{item['conflict_relation']}]--></span> 
+                    <strong>{item['behavior']}</strong> <span style="color:#1565C0; font-weight:600;">--[{item['behavior_relation']}]--></span> 
+                    <strong>{item['outcome']}</strong>
                     </div>
                     """, unsafe_allow_html=True)
             else:
@@ -301,9 +301,9 @@ elif page == "💬 LLM Chat":
                             for i, item in enumerate(evidence, 1):
                                 st.markdown(f"""
                                 <div class="evidence-chain">
-                                {i}. {item['preference']} --[{item['conflict_relation']}]--> 
-                                {item['behavior']} --[{item['behavior_relation']}]--> 
-                                {item['outcome']}
+                                {i}. <strong>{item['preference']}</strong> <span style="color:#1565C0; font-weight:600;">--[{item['conflict_relation']}]--></span> 
+                                <strong>{item['behavior']}</strong> <span style="color:#1565C0; font-weight:600;">--[{item['behavior_relation']}]--></span> 
+                                <strong>{item['outcome']}</strong>
                                 </div>
                                 """, unsafe_allow_html=True)
                         

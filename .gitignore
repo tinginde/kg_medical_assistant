@@ -1,16 +1,29 @@
-venv/
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-*.egg
-*.egg-info/
-dist/
-build/
-.DS_Store
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Streamlit
+.streamlit/
+
+# IDE
 .vscode/
 .idea/
-.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated Files
 *.png
+*.jpg
+*.csv
+!mok.csv
+temp_*
+kg_rag_batch_analysis_*.csv
+
+# Test Scripts
+test_*.py
+list_models.py
