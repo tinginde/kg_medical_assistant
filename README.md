@@ -39,8 +39,20 @@ If no API keys are provided, the system will use simulated LLM responses.
 
 ## Usage
 
-### Run Full Simulation
-Processes all 3 patient scenarios and generates visualizations:
+### 🌐 Web Interface (Recommended)
+Launch the interactive Streamlit web application:
+```powershell
+streamlit run app.py
+```
+
+The web app includes:
+- **📊 Dashboard**: Upload CSV, view patient summary and statistics
+- **🔍 KG Visualization**: Interactive patient selection with graph visualizations
+- **💬 LLM Chat**: Ask questions about specific patients
+- **📈 Batch Analysis**: Process all patients and download results
+
+### 🖥️ Command Line
+Run the original CLI simulation:
 ```powershell
 python main.py
 ```
@@ -101,5 +113,21 @@ kg_poc/
 - **NetworkX**: Graph data structure
 - **LangChain**: LLM orchestration framework
 - **Matplotlib**: Visualization
+- **Streamlit**: Interactive web interface
+- **Pandas**: CSV data processing
 - **Pytest**: Testing framework
 - **Python-dotenv**: Environment management
+
+## CSV Data Format
+
+The system accepts CSV files with the following columns:
+- `ID`: Patient identifier
+- `Weight Change (COA)`: Weight change with category
+- `HbA1c (COA)`: Glycated hemoglobin percentage
+- `Daily Steps (DHT)`: Step count
+- `Caloric Intake (DHT)`: Daily calories
+- `Dietary Flexibility (PPI Preference)`: Flexibility score (0-10)
+- `Rate of Weight Loss (PPI Preference)`: Weight loss preference score
+- `Key Scenario (For KG Edges)`: Descriptive scenario
+
+See `mok.csv` for a complete example.

@@ -1,4 +1,5 @@
 import networkx as nx
+from data_loader import PatientDataLoader
 
 def build_graph():
     """
@@ -76,6 +77,83 @@ def build_graph():
 
     return G
 
+def build_graph_from_csv(csv_path="mok.csv"):
+    """
+    Builds a Knowledge Graph dynamically from CSV patient data.
+    Returns both the graph and the patient data.
+    """
+    # Load patient data
+    loader = PatientDataLoader(csv_path)
+    patients = loader.process_data()
+    
+    G = nx.DiGraph()
+    
+    # Create shared behavior and metric nodes
+    G.add_node("Activity_Level_CSV", type="Behavior", description="Daily step count (from CSV)")
+    G.add_node("Calorie_Intake_CSV", type="Behavior", description="Daily caloric intake (from CSV)")
+    G.add_node("Weight_Change_Metric", type="Metric", description="Weight change over time")
+    G.add_node("HbA1c_Metric", type="Metric", description="Glycated hemoglobin")
+    
+    # Process each patient
+    for patient in patients:
+        patient_id = patient['id']
+        
+        # Create patient node
+        G.add_node(patient_id, type="Patient", 
+                  description=f"CSV Patient: {patient['weight_change_category']} weight change",
+                  data=patient)
+        
+        # Create preference nodes (unique per patient)
+        diet_flex_pref = f"{patient_id}_DietFlexPref"
+        weight_loss_pref = f"{patient_id}_WeightLossPref"
+        
+        G.add_node(diet_flex_pref, type="Preference",
+                  description=f"Dietary flexibility preference: {patient['diet_flexibility_label']}",
+                  score=patient['diet_flexibility_score'])
+        
+        G.add_node(weight_loss_pref, type="Preference",
+                  description=f"Weight loss rate preference: {patient['weight_loss_pref_label']}",
+                  score=patient['weight_loss_pref_score'])
+        
+        # Create outcome node
+        outcome_node = f"{patient_id}_Outcome"
+        G.add_node(outcome_node, type="Outcome",
+                  description=f"{patient['weight_change_category']} weight change: {patient['weight_change_value']} kg",
+                  weight_change=patient['weight_change_value'],
+                  category=patient['weight_change_category'])
+        
+        # Connect patient to preferences and outcome
+        G.add_edge(patient_id, diet_flex_pref, relation="has_preference")
+        G.add_edge(patient_id, weight_loss_pref, relation="has_preference")
+        G.add_edge(patient_id, outcome_node, relation="experiences")
+        
+        # Create edges based on data patterns
+        # Rule 1: High diet flexibility + High caloric intake → Conflict
+        if patient['diet_flexibility_class'] == 'High' and patient['caloric_intake_class'] == 'High':
+            G.add_edge(diet_flex_pref, "Calorie_Intake_CSV", relation="conflicts_with",
+                      reason=f"High flexibility ({patient['diet_flexibility_score']}/10) correlates with high intake ({patient['caloric_intake']} cal)")
+            G.add_edge("Calorie_Intake_CSV", outcome_node, relation="influences",
+                      effect="negative" if patient['weight_change_value'] < -1 else "neutral")
+        
+        # Rule 2: High activity + Low intake → Positive outcome
+        if patient['daily_steps_class'] == 'High' and patient['caloric_intake_class'] == 'Low':
+            G.add_edge("Activity_Level_CSV", outcome_node, relation="strongly_supports",
+                      reason=f"High activity ({patient['daily_steps']} steps) with controlled intake")
+        
+        # Rule 3: Low activity + High intake → Poor outcome
+        if patient['daily_steps_class'] == 'Low' and patient['caloric_intake_class'] == 'High':
+            G.add_edge("Activity_Level_CSV", outcome_node, relation="insufficient",
+                      reason=f"Low activity ({patient['daily_steps']} steps) cannot offset high intake")
+            G.add_edge("Calorie_Intake_CSV", outcome_node, relation="dominates",
+                      reason=f"High intake ({patient['caloric_intake']} cal) dominates outcome")
+        
+        # Rule 4: Exercise cannot compensate (high activity but still slow/increase)
+        if patient['daily_steps_class'] == 'High' and patient['weight_change_category'] in ['Slow', 'Increase']:
+            G.add_edge("Calorie_Intake_CSV", outcome_node, relation="compensates_for",
+                      reason="High caloric intake negates exercise benefits")
+    
+    return G, patients
+
 def get_patient_scenarios():
     """Returns a dictionary of patient scenarios for testing."""
     return {
@@ -94,6 +172,14 @@ def get_patient_scenarios():
     }
 
 if __name__ == "__main__":
+    # Test hardcoded scenarios
     G = build_graph()
-    print(f"Graph built with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
+    print(f"Hardcoded graph built with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
     print(f"\nAvailable patient scenarios: {list(get_patient_scenarios().keys())}")
+    
+    # Test CSV loading
+    print("\n" + "="*60)
+    print("Testing CSV loading...")
+    G_csv, patients = build_graph_from_csv("mok.csv")
+    print(f"CSV graph built with {G_csv.number_of_nodes()} nodes and {G_csv.number_of_edges()} edges.")
+    print(f"Loaded {len(patients)} patients from CSV.")

@@ -4,3 +4,6 @@ langchain-community==0.3.13
 matplotlib==3.9.3
 python-dotenv==1.0.1
 pytest==8.3.4
+pandas==2.2.3
+streamlit==1.41.1
+pillow==11.0.0
