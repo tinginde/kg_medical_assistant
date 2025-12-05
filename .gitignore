@@ -27,3 +27,7 @@ kg_rag_batch_analysis_*.csv
 # Test Scripts
 test_*.py
 list_models.py
+
+# Documentation/Analysis (generated during discussions)
+KG_DESIGN_COMPARISON.md
+QUESTION_TYPES_ANALYSIS.md
